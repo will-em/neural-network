@@ -47,8 +47,11 @@ image_pixels = image_size * image_size
 input_layer_size = image_pixels
 hidden_layer_size = 10
 output_layer_size = no_of_different_labels
-cost = CrossEntropyCost
 sizes = [input_layer_size, hidden_layer_size, output_layer_size]
+
+#Choose Cost Function, "CrossEntropyCost" or "QuadraticCost":
+cost = CrossEntropyCost
+
 
 
 #Sigmoid activation function:
@@ -98,15 +101,11 @@ def backPropagation(weights, biases,  x, y):
 
     #Backprop:
 
-    #print(activations[-1].shape, y.shape, zs[-1].shape)
-
     delta = cost.delta(zs[-1], activations[-1], y)
     nabla_w[-1] = np.dot(delta, activations[-2].transpose())
     nabla_b[-1] = delta
 
-    #print(weights[-1].transpose().shape, delta.shape,sigmoidGradient(zs[-2]).shape )
     delta = np.dot(weights[-1].transpose(), delta) * sigmoidGradient(zs[-2])
-    #print(delta.shape, activations[-3].shape)
     nabla_w[-2] = np.dot(delta, activations[-3].transpose())
     nabla_b[-2] = delta
 
@@ -127,15 +126,6 @@ def accuracy(weights, biases, num, n):
             num_of_correct+=1
 
     print("Accuracy: " + str(100*num_of_correct/num) + "%")
-
-
-"""
-weights.append(weightInitialization(input_layer_size,hidden_layer_size, 0.12))
-weights.append(weightInitialization(hidden_layer_size, output_layer_size, 0.12))
-
-biases.append(biasInitialization(input_layer_size,hidden_layer_size, 0.12))
-biases.append(biasInitialization(hidden_layer_size, output_layer_size, 0.12))
-"""
 
 weights, biases = initialization(sizes)
 
@@ -162,28 +152,33 @@ for currentEpoch in range(0, num_of_epoch):
 
             currentCost += cost.fn(feedForward(weights, biases, x), y)
             (nabla_w_delta, nabla_b_delta) = backPropagation(weights, biases, x, y)
-            #print(nabla_w[0].shape, nabla_w_delta[0].shape)
             nabla_w = [nab + delt for nab, delt in zip(nabla_w, nabla_w_delta)]
             nabla_b = [nab + delt for nab, delt in zip(nabla_b, nabla_b_delta)]
 
-        #print([np.shape(x) for x in nabla_w])
-        #print([np.average(x) for x in nabla_w])
         weights = [w - learning_rate/mini_batch_size*nw for w, nw in zip(weights, nabla_w)]
         biases = [b - learning_rate/mini_batch_size*nb for b, nb in zip(biases, nabla_b)]
-        #print([np.average(x) for x in weights])
+
         currentCost = currentCost/mini_batch_size
         print("Cost: " + str(currentCost))
         n += 1
 
     accuracy(weights, biases, 100, currentEpoch)
 
+plt.ion()
+test_imgs = test_imgs[1000:, :]
+np.random.shuffle(test_imgs)
 
-for i in range(1000, test_imgs.shape[0]-1):
+for i in range(0, test_imgs.shape[0]-1):
     image = np.reshape(test_imgs[i, :], (test_imgs[i, :].shape[0], 1))
     imageShow = test_imgs[i, :].reshape((image_size, image_size))
 
     a = feedForward(weights, biases, image)
-    print(np.argmax(a))
-
+    print("Guess: ", np.argmax(a),"\n")
     plt.imshow(imageShow, interpolation='nearest')
     plt.show()
+    inStr = input("Enter to proceed, 0 to exit: ")
+    print("")
+    if inStr is "0":
+        break
+    else:
+        plt.close()
