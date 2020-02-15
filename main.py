@@ -134,7 +134,7 @@ m = train_imgs.shape[0]
 mini_batch_size = 100
 learning_rate = 0.25
 lamb = 0
-num_of_epoch = 1
+num_of_epoch = 2
 
 
 for currentEpoch in range(0, num_of_epoch):
